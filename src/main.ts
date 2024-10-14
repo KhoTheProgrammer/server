@@ -5,7 +5,9 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({skipMissingProperties: true}));
+  app.useGlobalPipes(
+    new ValidationPipe({ skipMissingProperties: true, whitelist: true }),
+  );
   //app.setGlobalPrefix('api');
   app.enableCors();
   app.use(cookieParser());
