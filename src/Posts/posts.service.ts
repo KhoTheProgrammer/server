@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Post from './posts.entity';
-import { UpdatePostDto } from './updatePost.dto';
-import { CreatePostDto } from './createPost.dto';
+import { CreatePostDto } from './dto/createPost.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import UpdatePostDto from './dto/updatePost.dto';
 
 @Injectable()
 export default class PostsService {
@@ -12,8 +12,6 @@ export default class PostsService {
     private postsRepository: Repository<Post>,
   ) {}
 
-  private lastPostId = 0;
-  private posts: Post[] = [];
 
   getAllPosts() {
     return this.postsRepository.find();
@@ -37,7 +35,7 @@ export default class PostsService {
   }
 
   async createPost(post: CreatePostDto) {
-    const newPost = await this.postsRepository.create(post);
+    const newPost = this.postsRepository.create({ ...post });
     await this.postsRepository.save(newPost);
     return newPost;
   }
