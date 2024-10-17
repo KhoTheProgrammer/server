@@ -1,7 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import PostsService from 'src/posts/posts.service';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { CreateUserDto } from 'src/users/dto';
-import UserService from 'src/users/user.service';
 import { AuthService } from './auth.service';
 import { SigninDto } from './dto/signin.dto';
 
@@ -9,9 +7,7 @@ import { SigninDto } from './dto/signin.dto';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private postservice: PostsService,
-    private usersService: UserService,
-    private authservice: AuthService
+    private authservice: AuthService,
   ) {}
   @Post('signup')
   signup(@Body() signupdata: CreateUserDto) {
@@ -20,7 +16,8 @@ export class AuthController {
   }
 
   @Post('signin')
-  signin(@Body() signinata: SigninDto){
+  @HttpCode(HttpStatus.OK)
+  signin(@Body() signinata: SigninDto) {
     return this.authservice.signin(signinata);
   }
 }
