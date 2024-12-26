@@ -20,7 +20,6 @@ export class AuthController {
   constructor(private readonly authservice: AuthService) {}
   @Post('signup')
   signup(@Body() signupdata: CreateUserDto) {
-    console.log(signupdata);
     return this.authservice.signup(signupdata);
   }
 
@@ -36,7 +35,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthenticationGuard)
-  @Post('log-out')
+  @Post('logout')
   async logOut(@Req() request: RequestWithUser, @Res() response: Response) {
     response.setHeader('Set-Cookie', this.authservice.getCookieForLogOut());
     return response.sendStatus(200);
