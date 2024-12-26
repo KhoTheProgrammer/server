@@ -1,7 +1,7 @@
-import Post from 'src/posts/posts.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('user')
 class User {
   @PrimaryGeneratedColumn()
   public id: number;
@@ -13,10 +13,8 @@ class User {
   public name: string;
 
   @Column()
+  @Exclude()
   public password: string;
-
-  @OneToMany(() => Post, (post: Post) => post.author)
-  public posts: Post[];
 }
 
 export default User;

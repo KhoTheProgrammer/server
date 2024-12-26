@@ -1,13 +1,22 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { GetUser } from 'src/auth/Decorator/get-user.decorator';
 import { JwtGuard } from 'src/auth/Guard/jwt.guard';
 import User from './user.entity';
 import { EdituserDto } from './dto/edituser.dto';
 import UserService from './user.service';
-
 @Controller('users')
 export class UsersController {
-  constructor(private userservice: UserService) {}
+  constructor(
+    private userservice: UserService,
+  ) {}
 
   @UseGuards(JwtGuard)
   @Get('me')
@@ -16,14 +25,25 @@ export class UsersController {
   }
 
   @UseGuards(JwtGuard)
-  @Patch(':id')
-  editUser(@Param('id') id: string, @Body() editdata: EdituserDto) {
-    const user = this.userservice.editUser(Number(id), editdata);
-    return user;
+  @Patch('me')
+  editUser(@GetUser() user: User, @Body() editdata: EdituserDto) {
+    const updateduser = this.userservice.editUser(user.id, editdata);
+    return updateduser;
   }
 
   @Get()
   async getAllUsers() {
     return this.userservice.getAllusers();
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete('me/:id')
+  async deleteUser(@Param() id: number) {
+    return this.userservice.deleteUser(id);
+  }
+
+  @Get('address')
+  async getAlladdressesWithUsers() {
+    return this.userservice.getAllAddressesWithUsers();
   }
 }

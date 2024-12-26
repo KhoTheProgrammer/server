@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import TokenPayload from './tokenPayload.interface';
 
 @Injectable()
 export class AuthService {
@@ -13,12 +14,14 @@ export class AuthService {
     private jwtService: JwtService,
     private config: ConfigService,
   ) {}
+
   async signup(signupdata: CreateUserDto) {
     //generate the password hash
     const hash = await bcrypt.hash(signupdata.password, 10);
 
     //save the new user in the db
     const user = this.userService.create({ ...signupdata, password: hash });
+    (await user).password = undefined;
 
     //return user
     return user;
@@ -62,5 +65,45 @@ export class AuthService {
     return {
       access_token: token,
     };
+  }
+
+  public getCookieWithJwtToken(userId: number) {
+    const payload: TokenPayload = { userId };
+    const token = this.jwtService.sign(payload);
+    return `Aunthentication=${token}; HttpOnly; Path=/; Max-age=${this.config.get('JWT_EXPIRATION_TIME')}s`;
+  }
+
+  public getCookieForLogOut() {
+    return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+  }
+
+  public async getAuthenticatedUser(email: string, plainTextPassword: string) {
+    try {
+      const user = await this.userService.getByEmail(email);
+      await this.verifyPassword(plainTextPassword, user.password);
+      user.password = undefined;
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        'Wrong credentials provided',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private async verifyPassword(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ) {
+    const isPasswordMatching = await bcrypt.compare(
+      plainTextPassword,
+      hashedPassword,
+    );
+    if (!isPasswordMatching) {
+      throw new HttpException(
+        'Wrong credentials provided',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

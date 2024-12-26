@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Post from './posts.entity';
+import { UpdatePostDto } from './dto/updatePost.dto';
 import { CreatePostDto } from './dto/createPost.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import UpdatePostDto from './dto/updatePost.dto';
+
 
 @Injectable()
 export default class PostsService {
@@ -12,37 +13,41 @@ export default class PostsService {
     private postsRepository: Repository<Post>,
   ) {}
 
+  private lastPostId = 0;
+  private posts: Post[] = [];
 
   getAllPosts() {
     return this.postsRepository.find();
   }
 
-  async getPostById(id: number) {
-    const post = await this.postsRepository.findOneBy({ id: id });
+  getPostById(id: number) {
+    const post = this.posts.find((post) => post.id === id);
     if (post) {
       return post;
     }
     throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
   }
 
-  async updatePost(id: number, post: UpdatePostDto) {
-    await this.postsRepository.update(id, post);
-    const updatedPost = await this.postsRepository.findOneBy({ id: id });
-    if (updatedPost) {
-      return updatedPost;
+  replacePost(id: number, post: UpdatePostDto) {
+    const postIndex = this.posts.findIndex((post) => post.id === id);
+    if (postIndex > -1) {
+      this.posts[postIndex] = post;
+      return post;
     }
     throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
   }
 
-  async createPost(post: CreatePostDto) {
-    const newPost = this.postsRepository.create({ ...post });
-    await this.postsRepository.save(newPost);
-    return newPost;
+  createPost(post: CreatePostDto) {
+    const postedPost = this.postsRepository.create({...post});
+    this.postsRepository.save(postedPost);
+    return postedPost;
   }
 
-  async deletePost(id: number) {
-    const deleteResponse = await this.postsRepository.delete(id);
-    if (!deleteResponse.affected) {
+  deletePost(id: number) {
+    const postIndex = this.posts.findIndex((post) => post.id === id);
+    if (postIndex > -1) {
+      this.posts.splice(postIndex, 1);
+    } else {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
   }

@@ -45,13 +45,33 @@ export default class UserService {
   }
 
   async editUser(userid: number, editdata: EdituserDto) {
+    //Check if user exists
     const user = await this.getById(userid);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-   
+
+    //Update the user
     await this.usersRepository.update(user.id, editdata);
 
-    return user;
+    //Return the updated user
+    return this.getById(userid);
+  }
+
+  // Delete a specific user
+  async deleteUser(userId: number) {
+    //Check if user exixts
+    const user = await this.getById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Deletes the user from the database
+    const deleteduser = await this.usersRepository.delete(user.id);
+    return deleteduser;
+  }
+
+  getAllAddressesWithUsers() {
+    return this.usersRepository.find({ relations: ['address'] });
   }
 }
