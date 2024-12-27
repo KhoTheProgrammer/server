@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import Address from './address.entity';
 import Post from 'src/posts/posts.entity';
 
@@ -25,6 +25,7 @@ class User {
   public name: string;
 
   @Column()
+  @Exclude()
   public password: string;
 
   @OneToOne(() => Address, {
