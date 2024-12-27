@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
 import Address from './address.entity';
-import Post from 'src/posts/posts.entity';
+import Post from '../Posts/posts.entity';
 
 @Entity()
 class User {
