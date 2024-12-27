@@ -4,7 +4,8 @@ import { UpdatePostDto } from './dto/updatePost.dto';
 import { CreatePostDto } from './dto/createPost.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
+import User from 'src/users/user.entity';
+import PostNotFoundException from './exception/postNotFound.exception';
 
 @Injectable()
 export default class PostsService {
@@ -13,42 +14,47 @@ export default class PostsService {
     private postsRepository: Repository<Post>,
   ) {}
 
-  private lastPostId = 0;
-  private posts: Post[] = [];
-
   getAllPosts() {
-    return this.postsRepository.find();
+    return this.postsRepository.find({ relations: ['author'] });
   }
 
-  getPostById(id: number) {
-    const post = this.posts.find((post) => post.id === id);
+  async getPostById(id: number) {
+    const post = await this.postsRepository.findOne({
+      where: { id: id },
+      relations: ['author'],
+    });
     if (post) {
       return post;
     }
-    throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    throw new PostNotFoundException(id);
   }
 
-  replacePost(id: number, post: UpdatePostDto) {
-    const postIndex = this.posts.findIndex((post) => post.id === id);
-    if (postIndex > -1) {
-      this.posts[postIndex] = post;
-      return post;
+  async updatePost(id: number, post: UpdatePostDto) {
+    await this.postsRepository.update(id, post);
+    const updatedPost = await this.postsRepository.findOne({
+      where: { id: id },
+      relations: ['author'],
+    });
+    if (updatedPost) {
+      return updatedPost;
+    }
+    throw new PostNotFoundException(id);
+  }
+  async createPost(post: CreatePostDto, user: User) {
+    const newPost = this.postsRepository.create({
+      ...post,
+      author: user,
+    });
+    await this.postsRepository.save(newPost);
+    return newPost;
+  }
+
+  async deletePost(id: number) {
+    const post = await this.postsRepository.findOne({ where: { id } });
+    if (post) {
+      const deletedPost = await this.postsRepository.remove(post);
+      return deletedPost;
     }
     throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
-  }
-
-  createPost(post: CreatePostDto) {
-    const postedPost = this.postsRepository.create({...post});
-    this.postsRepository.save(postedPost);
-    return postedPost;
-  }
-
-  deletePost(id: number) {
-    const postIndex = this.posts.findIndex((post) => post.id === id);
-    if (postIndex > -1) {
-      this.posts.splice(postIndex, 1);
-    } else {
-      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
-    }
   }
 }
