@@ -18,7 +18,12 @@ export default class UserService {
   ) {}
 
   async getByEmail(email: string) {
-    const user = await this.usersRepository.findOneBy({ email: email });
+    const user = await this.usersRepository.findOne({
+      where: { email: email },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
 
@@ -29,7 +34,7 @@ export default class UserService {
   }
 
   async getById(id: number) {
-    const user = await this.usersRepository.findOneBy({ id: id });
+    const user = await this.usersRepository.findOne({ where: { id: id } });
     if (user) {
       return user;
     }
