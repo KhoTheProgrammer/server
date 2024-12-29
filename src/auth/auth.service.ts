@@ -1,11 +1,11 @@
 import { CreateUserDto } from 'src/users/dto';
-import UserService from 'src/users/user.service';
 import { SigninDto } from './dto/signin.dto';
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import TokenPayload from './tokenPayload.interface';
+import UserService from '../users/user.service';
 
 @Injectable()
 export class AuthService {
