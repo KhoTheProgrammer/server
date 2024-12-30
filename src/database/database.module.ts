@@ -18,9 +18,9 @@ import Category from 'src/Category/category.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
-        entities: [Post,User, Address, Category],
+        entities: [Post, User, Address, Category],
         synchronize: true,
-        logging: true,
+        autoLoadEntities: true
       }),
     }),
   ],
