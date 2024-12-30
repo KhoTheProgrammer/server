@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto';
 import User from './user.entity';
 import { EdituserDto } from './dto/edituser.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export default class UserService {
@@ -79,4 +80,13 @@ export default class UserService {
   getAllAddressesWithUsers() {
     return this.usersRepository.find({ relations: ['address'] });
   }
+
+  async setCurrentRefreshToken(token: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(token, 10);
+    await this.usersRepository.update(userId, {
+      currentHashedRefreshToken,
+    });
+  }
+
+  async get
 }
