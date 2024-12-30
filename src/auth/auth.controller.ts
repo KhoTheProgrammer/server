@@ -15,11 +15,15 @@ import RequestWithUser from './RequestWithUser.interface';
 import { LocalAuthenticationGuard } from './localAuth.guard';
 import { Response } from 'express';
 import JwtAuthenticationGuard from './jwt-auth.guard';
+import UserService from 'src/users/user.service';
 
 @Controller('auth')
 @SerializeOptions({ strategy: 'excludeAll' })
 export class AuthController {
-  constructor(private readonly authservice: AuthService) {}
+  constructor(
+    private readonly authservice: AuthService,
+    private readonly userservice: UserService,
+  ) {}
   @Post('signup')
   signup(@Body() signupdata: CreateUserDto) {
     return this.authservice.signup(signupdata);
@@ -31,7 +35,10 @@ export class AuthController {
   async logIn(@Req() request: RequestWithUser) {
     const { user } = request;
     const cookie = this.authservice.getCookieWithJwtToken(user.id);
-    request.res.setHeader('Set-Cookie', cookie);
+    const { RefreshCookie, Refreshtoken } =
+      this.authservice.getCookieWithRefreshToken(user.id);
+    await this.userservice.setCurrentRefreshToken(Refreshtoken, user.id);
+    request.res.setHeader('Set-Cookie', [cookie, RefreshCookie]);
     return user;
   }
 
