@@ -10,7 +10,6 @@ import { Exclude, Expose } from 'class-transformer';
 import Address from './address.entity';
 import Post from 'src/posts/posts.entity';
 
-
 @Entity()
 class User {
   @PrimaryGeneratedColumn()
@@ -38,6 +37,10 @@ class User {
 
   @OneToMany(() => Post, (post: Post) => post.author)
   public posts: Post[];
+
+  @Column({ nullable: true })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
 }
 
 export default User;
