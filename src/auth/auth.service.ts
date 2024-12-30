@@ -73,6 +73,19 @@ export class AuthService {
     return `Aunthentication=${token}; HttpOnly; Path=/; Max-age=${this.config.get('JWT_EXPIRATION_TIME')}s`;
   }
 
+  public getCookieWithRefreshToken(userId: number) {
+    const payload: TokenPayload = { userId };
+    const Refreshtoken = this.jwtService.sign(payload, {
+      secret: this.config.get('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: `${this.config.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`,
+    });
+    const RefreshCookie = `Refresh=${Refreshtoken}; HttpOnly; Path=/; Max-age=${this.config.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`;
+    return {
+      RefreshCookie,
+      Refreshtoken,
+    };
+  }
+
   public getCookieForLogOut() {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
