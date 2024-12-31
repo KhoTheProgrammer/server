@@ -93,4 +93,10 @@ export default class UserService {
     const ismatch = await bcrypt.compare(token, user.currentHashedRefreshToken);
     if (ismatch) return user;
   }
+
+  async removeRefreshToken(userId: number) {
+    return this.usersRepository.update(userId, {
+      currentHashedRefreshToken: null,
+    });
+  }
 }
