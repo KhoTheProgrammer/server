@@ -88,5 +88,9 @@ export default class UserService {
     });
   }
 
-  async get
+  async getUserIfTokenMatches(token: string, userId: number) {
+    const user = await this.getById(userId);
+    const ismatch = await bcrypt.compare(token, user.currentHashedRefreshToken);
+    if (ismatch) return user;
+  }
 }
