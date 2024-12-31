@@ -12,7 +12,7 @@ import {
 import PostsService from './posts.service';
 import { CreatePostDto } from './dto/createPost.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
-import JwtAuthenticationGuard from 'src/auth/jwt-auth.guard';
+import JwtAuthenticationGuard from 'src/auth/Guard/jwt-auth.guard';
 import FindOneParams from 'src/utils/findOneParams';
 import RequestWithUser from 'src/auth/RequestWithUser.interface';
 
