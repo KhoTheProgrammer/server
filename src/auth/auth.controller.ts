@@ -12,10 +12,11 @@ import {
 import { CreateUserDto } from 'src/users/dto';
 import { AuthService } from './auth.service';
 import RequestWithUser from './RequestWithUser.interface';
-import { LocalAuthenticationGuard } from './localAuth.guard';
+import { LocalAuthenticationGuard } from './Guard/localAuth.guard';
 import { Response } from 'express';
-import JwtAuthenticationGuard from './jwt-auth.guard';
+import JwtAuthenticationGuard from './Guard/jwt-auth.guard';
 import UserService from 'src/users/user.service';
+import { JwtRefreshGuard } from './Guard/jwtRefresh.guard';
 
 @Controller('auth')
 @SerializeOptions({ strategy: 'excludeAll' })
@@ -44,9 +45,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthenticationGuard)
   @Post('logout')
-  async logOut(@Req() request: RequestWithUser, @Res() response: Response) {
-    response.setHeader('Set-Cookie', this.authservice.getCookieForLogOut());
-    return response.sendStatus(200);
+  async logOut(@Req() request: RequestWithUser) {
+    await this.userservice.removeRefreshToken(request.user.id);
+    request.res.setHeader('Set-Cookie', this.authservice.getCookiesForLogOut());
   }
 
   @UseGuards(JwtAuthenticationGuard)
@@ -54,5 +55,15 @@ export class AuthController {
   authenticate(@Req() request: RequestWithUser) {
     const user = request.user;
     return user;
+  }
+
+  @UseGuards(JwtRefreshGuard)
+  @Get('refresh')
+  refresh(@Req() request: RequestWithUser) {
+    const accessTokenCookie = this.authservice.getCookieWithJwtToken(
+      request.user.id,
+    );
+    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    return request.user;
   }
 }
