@@ -126,4 +126,13 @@ export class AuthService {
       'Refresh=; HttpOnly; Path=/; Max-Age=0',
     ];
   }
+
+  public async getUserFromAuthToken(token: string) {
+    const payload: TokenPayload = this.jwtService.verify(token, {
+      secret: this.config.get('JWT_SECRET'),
+    });
+    if (payload.userId) {
+      return this.userService.getById(payload.userId);
+    }
+  }
 }
